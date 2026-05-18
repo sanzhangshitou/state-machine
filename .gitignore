@@ -1,0 +1,26 @@
+# PHP
+/vendor/
+/composer.lock
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# PHPUnit
+.phpunit.result.cache
+/build/
+
+# Composer
+composer.phar
+.claude

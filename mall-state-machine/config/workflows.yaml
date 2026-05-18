@@ -1,0 +1,230 @@
+# ============================================================
+# 商城五模块状态机配置 - Symfony Workflow
+# ============================================================
+
+framework:
+  workflows:
+    # --------------------------------------------------
+    # 1. 商品状态机
+    # --------------------------------------------------
+    product:
+      type: state_machine
+      marking_store:
+        type: method
+        property: state
+      supports:
+        - Mall\Entity\Product
+      initial_marking: draft
+      places:
+        - draft
+        - pending_review
+        - published
+        - off_shelf
+        - deleted
+      transitions:
+        submit_review:
+          from: draft
+          to:   pending_review
+        approve:
+          from: pending_review
+          to:   published
+        reject:
+          from: pending_review
+          to:   draft
+        off_shelf:
+          from: published
+          to:   off_shelf
+        relist:
+          from: off_shelf
+          to:   published
+        delete:
+          from: [draft, off_shelf]
+          to:   deleted
+
+    # --------------------------------------------------
+    # 2. 订单状态机
+    # --------------------------------------------------
+    order:
+      type: state_machine
+      marking_store:
+        type: method
+        property: state
+      supports:
+        - Mall\Entity\Order
+      initial_marking: pending
+      places:
+        - pending
+        - confirmed
+        - processing
+        - shipped
+        - delivered
+        - completed
+        - cancelled
+        - refunding
+      transitions:
+        confirm:
+          from: pending
+          to:   confirmed
+        process:
+          from: confirmed
+          to:   processing
+        ship:
+          from: processing
+          to:   shipped
+        deliver:
+          from: shipped
+          to:   delivered
+        complete:
+          from: delivered
+          to:   completed
+        cancel:
+          from: [pending, confirmed]
+          to:   cancelled
+        request_refund:
+          from: delivered
+          to:   refunding
+        complete_refund:
+          from: refunding
+          to:   completed
+
+    # --------------------------------------------------
+    # 3. 支付状态机
+    # --------------------------------------------------
+    payment:
+      type: state_machine
+      marking_store:
+        type: method
+        property: state
+      supports:
+        - Mall\Entity\Payment
+      initial_marking: pending
+      places:
+        - pending
+        - processing
+        - paid
+        - failed
+        - refunding
+        - refunded
+        - partial_refund
+      transitions:
+        pay:
+          from: pending
+          to:   processing
+        pay_success:
+          from: processing
+          to:   paid
+        pay_fail:
+          from: processing
+          to:   failed
+        retry_pay:
+          from: failed
+          to:   processing
+        start_refund:
+          from: paid
+          to:   refunding
+        refund_success:
+          from: refunding
+          to:   refunded
+        partial_refund:
+          from: paid
+          to:   partial_refund
+
+    # --------------------------------------------------
+    # 4. 售后状态机
+    # --------------------------------------------------
+    after_sale:
+      type: state_machine
+      marking_store:
+        type: method
+        property: state
+      supports:
+        - Mall\Entity\AfterSale
+      initial_marking: pending
+      places:
+        - pending
+        - approved
+        - rejected
+        - returning
+        - returned
+        - refunding
+        - refunded
+        - completed
+        - closed
+      transitions:
+        approve:
+          from: pending
+          to:   approved
+        reject:
+          from: pending
+          to:   rejected
+        reapply:
+          from: rejected
+          to:   pending
+        start_return:
+          from: approved
+          to:   returning
+        confirm_return:
+          from: returning
+          to:   returned
+        start_refund:
+          from: [approved, returned]
+          to:   refunding
+        refund_success:
+          from: refunding
+          to:   refunded
+        complete:
+          from: refunded
+          to:   completed
+        close:
+          from: [pending, approved, rejected]
+          to:   closed
+
+    # --------------------------------------------------
+    # 5. 物流状态机
+    # --------------------------------------------------
+    logistics:
+      type: state_machine
+      marking_store:
+        type: method
+        property: state
+      supports:
+        - Mall\Entity\Logistics
+      initial_marking: pending
+      places:
+        - pending
+        - picking
+        - packed
+        - shipped
+        - arrived
+        - out_for_delivery
+        - delivered
+        - returned
+        - exception
+      transitions:
+        start_pick:
+          from: pending
+          to:   picking
+        pack:
+          from: picking
+          to:   packed
+        ship_out:
+          from: packed
+          to:   shipped
+        arrive:
+          from: shipped
+          to:   arrived
+        out_delivery:
+          from: arrived
+          to:   out_for_delivery
+        sign:
+          from: out_for_delivery
+          to:   delivered
+        return_back:
+          from: shipped
+          to:   returned
+        mark_exception:
+          from: [shipped, picking, packed]
+          to:   exception
+        resolve:
+          from: exception
+          to:   shipped

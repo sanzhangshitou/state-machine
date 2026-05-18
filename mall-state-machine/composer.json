@@ -1,0 +1,21 @@
+{
+    "name": "mall/state-machine",
+    "description": "商城状态机 - 商品/下单/支付/售后/物流 基于 Symfony Workflow",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "symfony/workflow": "^6.4",
+        "symfony/event-dispatcher": "^6.4",
+        "symfony/yaml": "^6.4",
+        "doctrine/dbal": "^3.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mall\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}
